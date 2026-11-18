@@ -2,97 +2,309 @@
 <!DOCTYPE html>
 <html lang="de">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>FEUER&EIS – Hotel-Datenbank</title>
-    <style>
-        * { box-sizing: border-box; }
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>FEUER&EIS – Hotel-Datenbank</title>
 
-        body {
-            margin: 0;
-            font-family: Arial, sans-serif;
-            background: #f1f4f7;
-            color: #293746;
-        }
+<style>
+* { box-sizing: border-box; }
 
-        header {
-            background: #19354d;
-            color: white;
-            padding: 45px 20px;
-            text-align: center;
-        }
+body {
+    margin: 0;
+    font-family: Arial, sans-serif;
+    background: #f1f4f7;
+    color: #263747;
+}
 
-        header h1 {
-            margin: 0;
-            letter-spacing: 3px;
-        }
+header {
+    background: #19354d;
+    color: white;
+    padding: 25px 35px;
+}
 
-        main {
-            max-width: 900px;
-            margin: 40px auto;
-            padding: 20px;
-        }
+header h1 { margin: 0; }
 
-        .card {
-            background: white;
-            padding: 28px;
-            margin-bottom: 22px;
-            border-radius: 12px;
-            box-shadow: 0 4px 14px rgba(0,0,0,.05);
-        }
+nav {
+    background: #244760;
+    padding: 12px 35px;
+    color: white;
+}
 
-        h2 { color: #19354d; }
+main {
+    max-width: 1250px;
+    margin: 30px auto;
+    padding: 20px;
+}
 
-        .status {
-            color: #27804b;
-            font-weight: bold;
-        }
+.card {
+    background: white;
+    padding: 24px;
+    border-radius: 12px;
+    margin-bottom: 22px;
+    box-shadow: 0 3px 12px rgba(0,0,0,.05);
+}
 
-        footer {
-            text-align: center;
-            padding: 30px;
-            color: #74818d;
-        }
-    </style>
+.filters {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(190px, 1fr));
+    gap: 15px;
+}
+
+input, button {
+    width: 100%;
+    padding: 12px;
+    border-radius: 7px;
+    font-size: 15px;
+}
+
+input {
+    border: 1px solid #ccd5dd;
+}
+
+button {
+    border: none;
+    background: #19354d;
+    color: white;
+    cursor: pointer;
+}
+
+button:hover { background: #315a78; }
+
+.secondary {
+    background: #667887;
+}
+
+table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+th, td {
+    padding: 12px;
+    border-bottom: 1px solid #e3e8ec;
+    text-align: left;
+}
+
+th {
+    background: #edf2f6;
+}
+
+.table-wrap {
+    overflow-x: auto;
+}
+
+#newHotelForm {
+    display: none;
+}
+
+.form-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 12px;
+}
+
+.notice {
+    font-size: 13px;
+    color: #71808c;
+}
+
+@media (max-width: 600px) {
+    header, nav { padding: 20px; }
+    main { padding: 12px; }
+    .card { padding: 16px; }
+}
+</style>
 </head>
+
 <body>
 
 <header>
     <h1>FEUER&EIS</h1>
-    <p>Hotel- &amp; Tourendatenbank</p>
+    <p>Hotel- & Tourendatenbank</p>
 </header>
 
+<nav>
+    Testversion · Hotelverwaltung
+</nav>
+
 <main>
-    <div class="card">
-        <h2>Willkommen in der Testversion</h2>
-        <p>
-            Wir entwickeln eine neue interne Datenbank für
-            Hotelpartner, Radreisen, Wandertouren und Transferpartner.
-        </p>
-        <p class="status">✓ Demo-Webseite erfolgreich geladen</p>
+
+<div class="card">
+    <h2>Hotelpartner suchen</h2>
+
+    <div class="filters">
+        <input id="searchName" placeholder="Hotelname">
+        <input id="searchTown" placeholder="Ort">
+        <input id="searchCode" placeholder="LF-Code">
+
+        <button onclick="searchHotels()">Suchen</button>
+        <button class="secondary" onclick="resetSearch()">Zurücksetzen</button>
+    </div>
+</div>
+
+<div class="card">
+    <button onclick="toggleForm()">+ Neues Hotel hinzufügen</button>
+
+    <div id="newHotelForm">
+        <h2>Neuen Datensatz eingeben</h2>
+
+        <div class="form-grid">
+            <input id="newName" placeholder="Hotelname">
+            <input id="newTown" placeholder="Ort">
+            <input id="newCode" placeholder="LF-Code">
+            <input id="newContact" placeholder="Ansprechpartner">
+            <input id="newPhone" placeholder="Telefon">
+            <input id="newEmail" placeholder="E-Mail">
+        </div>
+
+        <br>
+        <button onclick="addHotel()">Datensatz speichern</button>
+        <button class="secondary" onclick="toggleForm()">Abbrechen</button>
+    </div>
+</div>
+
+<div class="card">
+    <h2>Hotelübersicht</h2>
+    <p id="resultCount"></p>
+
+    <div class="table-wrap">
+        <table>
+            <thead>
+                <tr>
+                    <th>Hotel</th>
+                    <th>Ort</th>
+                    <th>LF-Code</th>
+                    <th>Ansprechpartner</th>
+                    <th>Telefon</th>
+                    <th>E-Mail</th>
+                </tr>
+            </thead>
+            <tbody id="hotelTable"></tbody>
+        </table>
     </div>
 
-    <div class="card">
-        <h2>Geplante Funktionen</h2>
-        <ul>
-            <li>Hotelpartner suchen und verwalten</li>
-            <li>Touren und Etappen abfragen</li>
-            <li>Transferpartner finden</li>
-            <li>Entfernungs- und Umkreissuche</li>
-            <li>Neue Datensätze eingeben</li>
-            <li>Hotelpreise und Saisonzeiten verwalten</li>
-        </ul>
-    </div>
+    <p class="notice">
+        Demo-Version: Die Beispieldaten sind nicht dauerhaft gespeichert.
+    </p>
+</div>
 
-    <div class="card">
-        <h2>Projektstatus</h2>
-        <p>Version 0.1 – Öffentliche Testumgebung</p>
-    </div>
 </main>
 
-<footer>
-    FEUER&EIS · Datenbankprojekt
-</footer>
+<script>
+let hotels = [
+    {
+        name: "Beispielhotel Alpenblick",
+        town: "Mittenwald",
+        code: "LF1001",
+        contact: "Max Mustermann",
+        phone: "0000 123456",
+        email: "beispiel@example.com"
+    },
+    {
+        name: "Demo Hotel Bergwelt",
+        town: "Garmisch-Partenkirchen",
+        code: "LF1002",
+        contact: "Anna Beispiel",
+        phone: "0000 654321",
+        email: "demo@example.com"
+    },
+    {
+        name: "Testhotel am See",
+        town: "Schliersee",
+        code: "LF1003",
+        contact: "Peter Muster",
+        phone: "0000 987654",
+        email: "test@example.com"
+    }
+];
+
+function renderHotels(list) {
+    const table = document.getElementById("hotelTable");
+    table.innerHTML = "";
+
+    list.forEach(hotel => {
+        const row = document.createElement("tr");
+
+        [
+            hotel.name,
+            hotel.town,
+            hotel.code,
+            hotel.contact,
+            hotel.phone,
+            hotel.email
+        ].forEach(value => {
+            const cell = document.createElement("td");
+            cell.textContent = value || "";
+            row.appendChild(cell);
+        });
+
+        table.appendChild(row);
+    });
+
+    document.getElementById("resultCount").textContent =
+        list.length + " Hotels gefunden";
+}
+
+function searchHotels() {
+    const name = document.getElementById("searchName").value.toLowerCase();
+    const town = document.getElementById("searchTown").value.toLowerCase();
+    const code = document.getElementById("searchCode").value.toLowerCase();
+
+    const results = hotels.filter(hotel =>
+        hotel.name.toLowerCase().includes(name) &&
+        hotel.town.toLowerCase().includes(town) &&
+        hotel.code.toLowerCase().includes(code)
+    );
+
+    renderHotels(results);
+}
+
+function resetSearch() {
+    document.getElementById("searchName").value = "";
+    document.getElementById("searchTown").value = "";
+    document.getElementById("searchCode").value = "";
+    renderHotels(hotels);
+}
+
+function toggleForm() {
+    const form = document.getElementById("newHotelForm");
+    form.style.display = form.style.display === "block" ? "none" : "block";
+}
+
+function addHotel() {
+    const name = document.getElementById("newName").value.trim();
+    const town = document.getElementById("newTown").value.trim();
+    const code = document.getElementById("newCode").value.trim();
+
+    if (!name || !town || !code) {
+        alert("Bitte Hotelname, Ort und LF-Code eingeben.");
+        return;
+    }
+
+    hotels.push({
+        name: name,
+        town: town,
+        code: code,
+        contact: document.getElementById("newContact").value,
+        phone: document.getElementById("newPhone").value,
+        email: document.getElementById("newEmail").value
+    });
+
+    document.getElementById("newName").value = "";
+    document.getElementById("newTown").value = "";
+    document.getElementById("newCode").value = "";
+    document.getElementById("newContact").value = "";
+    document.getElementById("newPhone").value = "";
+    document.getElementById("newEmail").value = "";
+
+    document.getElementById("newHotelForm").style.display = "none";
+
+    renderHotels(hotels);
+    alert("Hotel wurde in der Demo hinzugefügt.");
+}
+
+renderHotels(hotels);
+</script>
 
 </body>
 </html>
